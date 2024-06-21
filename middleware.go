@@ -23,7 +23,15 @@ func middleware(next http.Handler, allowedIPs []string) http.Handler {
 		fmt.Printf("Checking IP: %s\n", ip)
 		fmt.Println("Allowed IPs:", allowedIPsmap)
 
-		if !allowedIPsmap[ip] {
+		allowed := false
+		for _, prefix := range allowedIPs {
+			if strings.HasPrefix(ip, prefix) {
+				allowed = true
+				break
+			}
+		}
+
+		if !allowed {
 			http.Error(w, "Not Allowed", http.StatusForbidden)
 			return
 		}
@@ -33,7 +41,7 @@ func middleware(next http.Handler, allowedIPs []string) http.Handler {
 
 func main() {
 	allowedIPs := []string{
-		"39.32.0.0", "110.36.0.0", "119.152.0.0", "182.176.0.0",
+		"39.32.", "110.36.", "119.152.", "182.176.",
 	}
 	http.Handle("/", middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		println(w, "You're allowed!")
